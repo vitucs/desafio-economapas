@@ -11343,3 +11343,30 @@ textarea.form-control-lg {
 .formButton{
   margin-left: 10px;
 }
+
+.developed{
+  position: absolute;
+  right: 0;
+  bottom: 5;
+  font-size: 14px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  margin-right: 5px;
+}
+
+@media (max-width: 700px) {
+  .buttons{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+  .headerGroup{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+}

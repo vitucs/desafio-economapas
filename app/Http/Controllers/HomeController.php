@@ -116,6 +116,9 @@ class HomeController extends Controller
     {
         $cidades = Storage::disk('local')->get('\capitais.json');
         $group = DB::table('citygroup')->where('group', '=', $id)->orderBy('id')->get();
+        if($request->user()->username!=$group[0]->username){
+            return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'fail' => 'Você não pode editar esse grupo!']);
+        }
         return view('edit', ['group' => $group])->with('cidades', json_decode($cidades, true));
     }
 
@@ -151,10 +154,14 @@ class HomeController extends Controller
 
     public function delete(Request $request, $id)
     {
+        $groups = DB::table('citygroup')->where('group', $id)->get();
+        if($request->user()->username!=$groups[0]->username){
+            $cidades = Storage::disk('local')->get('\capitais.json');
+            return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'fail' => 'Você não pode excluir esse grupo!']);
+        }
         DB::table('citygroup')->where('group', $id)->delete();
-        $groups = DB::table('citygroup')->orderBy('id')->get();
         $collection = collect($groups);
-        $grouped = $collection->groupBy('group');
+        $grouped = $collection->groupBy('group');        
         return back()->with('success', 'Grupo excluido com sucesso!');
     }
 }

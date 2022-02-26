@@ -8,15 +8,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Desafio Economapas</title>
-
+    <link rel="shortcut icon" type="imagex/png" href="https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://economapas.com.br&size=64">
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-
-    <!-- Styles -->
+        <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
@@ -79,6 +78,8 @@
                 @yield('content')
             </main>
         </div>
+        
+        <div class="developed">Desenvolvido por Victor Santos @github.com/vitucs</div>
     </div>
 </body>
 </html>
