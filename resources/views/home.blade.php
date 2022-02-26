@@ -3,14 +3,14 @@
 @section('content')
 <div class="principal">
 
-    @if(Session::get('success'))
+    @if(session('success'))
     <div class="alert alert-success">
-        {{Session::get('success')}}
+        {{session('success')}}
     </div>
     @endif
-    @if(Session::get('fail'))
+    @if(session('fail'))
     <div class="alert alert-danger">
-        {{Session::get('fail')}}
+        {{session('fail')}}
     </div>
     @endif
     <div class="card text-center">

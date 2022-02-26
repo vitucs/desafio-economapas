@@ -15,6 +15,7 @@ class CreateCitygroupTable extends Migration
     {
         Schema::create('citygroup', function (Blueprint $table) {
             $table->id();
+            $table->string('username');
             $table->string('groupName');
             $table->string('group');
             $table->string('city');

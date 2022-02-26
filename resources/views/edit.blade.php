@@ -3,19 +3,25 @@
 @section('content')
 <div class="principal">
 
-    @if(Session::get('success'))
+    @if(session('success'))
     <div class="alert alert-success">
-        {{Session::get('success')}}
+        {{session('success')}}
     </div>
     @endif
-    @if(Session::get('fail'))
+    @if(session('fail'))
     <div class="alert alert-danger">
-        {{Session::get('fail')}}
+        {{session('fail')}}
     </div>
     @endif
     <div class="card text-center">
         <div class="card-header">
             <ul class="nav nav-tabs card-header-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" href="/home">Grupo Atual</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/groups">Grupos já Existentes</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link active">Editar Grupo</a>
                 </li>
@@ -24,12 +30,12 @@
         <div class="card-body">
             <div class="card" style="width: auto;">
                 <form action="/update/{{$group[0]->group}}" method="POST">
-                    @csrf 
+                    @csrf
                     @method('patch')
                     <div hidden>{{sort($cidades);}}</div>
                     <div class="card" style="width: auto; margin: 10px;">
                         <div class="card-header headerGroup">
-                            <input type="text" value="{{$group[0]->groupName}}" style="text-align: center;" name="groupName"/>
+                            <input type="text" value="{{$group[0]->groupName}}" style="text-align: center;" name="groupName" />
                         </div>
                         @foreach ($group as $content)
                         <select class="form-select select-cities" aria-label="Default select example" name="oldCity{{$loop->index+1}}">
@@ -49,7 +55,7 @@
                             </option>
                             @endforeach
                             </select>
-                        @endfor
+                            @endfor
                     </div>
                     <input type="submit" class="btn btn-primary button-cities" value="Atualizar Grupo" />
                 </form>

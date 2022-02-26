@@ -11302,10 +11302,17 @@ textarea.form-control-lg {
 
 .conteudo-home{
   display: flex;
+  height: auto;
   align-items: center;
   justify-content: center;
 }
 
+.login-box{
+  display: flex;
+  height: 90vh;
+  align-items: center;
+  justify-content: center;
+}
 .button-cities{
   margin-top: 10px;
 }

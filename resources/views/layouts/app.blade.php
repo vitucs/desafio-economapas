@@ -75,7 +75,7 @@
             </div>
         </nav>
         <div class="conteudo-home">
-            <main class="py-4">
+            <main class="py-4 login-box">
                 @yield('content')
             </main>
         </div>

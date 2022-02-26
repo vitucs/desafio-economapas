@@ -3,14 +3,14 @@
 @section('content')
 <div class="principal">
 
-    @if(Session::get('success'))
+    @if(session('success'))
     <div class="alert alert-success">
-        {{Session::get('success')}}
+        {{session('success')}}
     </div>
     @endif
-    @if(Session::get('fail'))
+    @if(session('fail'))
     <div class="alert alert-danger">
-        {{Session::get('fail')}}
+        {{session('fail')}}
     </div>
     @endif
     <div class="card text-center">
@@ -29,18 +29,25 @@
                 <div class="card-header titles">
                     Grupos Criados
                 </div>
+                @if(isset($groups) && $groups->count() == 0)
+                <div class="card" style="width: auto; margin: 10px;">
+                    <div class="list-group list-group-flush" style="color: red; font-size:16px;">
+                        Nenhum grupo encontrado para esse usuário.
+                    </div>
+                </div>
+                @endif
                 @foreach ($groups as $group)
                 <div class="card" style="width: auto; margin: 10px;">
                     <div class="card-header headerGroup">
                         {{$group[0]->groupName}}
                         <div class="buttons">
                             <form action='/edit/{{$group[0]->group}}' class="formButton" method="POST">
-                                @csrf 
+                                @csrf
                                 @method('get')
                                 <input type="submit" class="btn btn-primary" value="Editar Grupo" />
                             </form>
                             <form action='/delete/{{$group[0]->group}}' class="formButton" method="POST">
-                                @csrf 
+                                @csrf
                                 @method('delete')
                                 <input type="submit" class="btn btn-danger" value="Excluir Grupo" />
                             </form>

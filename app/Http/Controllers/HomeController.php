@@ -36,21 +36,30 @@ class HomeController extends Controller
 
     public function create(Request $request)
     {
-        $request->id = (new GroupService)->getLastGroupId();
-        if ($request->id != '1') $id = $request->id->group + 1;
-        else $id = 1;
         if ($request->filled('groupName')) {
             $groupName = $request->groupName;
         } else {
             return back()->with('fail', 'Insira o nome do grupo!');
         }
 
+        if (count(DB::table('citygroup')->where('username', '=', $request->user()->username)->where('groupname', '=', $request->groupName)->get()) != 0) {
+            return back()->with('fail', 'Já existe um grupo com esse nome cadastrado!');
+        }
+
+        $request->id = (new GroupService)->getLastGroupId();
+        if ($request->id != '1') {
+            $id = $request->id->group + 1;
+        } else {
+            $id = 1;
+        }
+        
         if ($request->filled('cidade1')) {
             $cidade1 = $request->get('cidade1');
             $query = DB::table('citygroup')->insert([
                 'group' => $id,
                 'city' => $cidade1,
-                'groupName' => $groupName
+                'groupName' => $groupName,
+                'username' => $request->user()->username
             ]);
         }
         if ($request->filled('cidade2')) {
@@ -58,7 +67,8 @@ class HomeController extends Controller
             $query = DB::table('citygroup')->insert([
                 'group' => $id,
                 'city' => $cidade2,
-                'groupName' => $groupName
+                'groupName' => $groupName,
+                'username' => $request->user()->username
             ]);
         }
         if ($request->filled('cidade3')) {
@@ -66,7 +76,8 @@ class HomeController extends Controller
             $query = DB::table('citygroup')->insert([
                 'group' => $id,
                 'city' => $cidade3,
-                'groupName' => $groupName
+                'groupName' => $groupName,
+                'username' => $request->user()->username
             ]);
         }
         if ($request->filled('cidade4')) {
@@ -74,7 +85,8 @@ class HomeController extends Controller
             $query = DB::table('citygroup')->insert([
                 'group' => $id,
                 'city' => $cidade4,
-                'groupName' => $groupName
+                'groupName' => $groupName,
+                'username' => $request->user()->username
             ]);
         }
         if ($request->filled('cidade5')) {
@@ -82,7 +94,8 @@ class HomeController extends Controller
             $query = DB::table('citygroup')->insert([
                 'group' => $id,
                 'city' => $cidade5,
-                'groupName' => $groupName
+                'groupName' => $groupName,
+                'username' => $request->user()->username
             ]);
         }
         if ($request->filled('cidade1') || $request->filled('cidade2') || $request->filled('cidade3') || $request->filled('cidade4') || $request->filled('cidade5'))
@@ -91,9 +104,9 @@ class HomeController extends Controller
             return back()->with('fail', 'Insira pelo menos uma cidade para criar um grupo!');
     }
 
-    public function groups()
+    public function groups(Request $request)
     {
-        $groups = DB::table('citygroup')->orderBy('id')->get();
+        $groups = DB::table('citygroup')->where('username', '=', $request->user()->username)->orderBy('id')->get();
         $collection = collect($groups);
         $grouped = $collection->groupBy('group');
         return view('groups', ['groups' => $grouped]);
@@ -110,31 +123,30 @@ class HomeController extends Controller
     {
         $cidades = Storage::disk('local')->get('\capitais.json');
         $ids = array_values($request->only('oldCity1', 'oldCity2', 'oldCity3', 'oldCity4', 'oldCity5', 'newCity1', 'newCity2', 'newCity3', 'newCity4', 'newCity5'));
-        for($i=0;$i<sizeof($ids);$i++){
+        for ($i = 0; $i < sizeof($ids); $i++) {
             list($itemId, $cityName) = explode("_", $ids[$i]);
-            if($cityName== 'null'){
+            if ($cityName == 'null') {
                 DB::table('citygroup')->where('id', $itemId)->delete();
-                if(count(DB::table('citygroup')->where('group', $id)->get()) == 0){
-                    return view('home', ['cidades'=>json_decode($cidades, true)]);
+                if (count(DB::table('citygroup')->where('group', $id)->get()) == 0) {
+                    return view('home', ['cidades' => json_decode($cidades, true)]);
                 }
-            }
-            else if ($itemId != 'newItem') {
+            } else if ($itemId != 'newItem') {
                 DB::table('citygroup')
-                ->where('id', $itemId)
-                ->update([
-                    'city' => $cityName,
-                    'groupName' => $request->groupName
-                ]);
-                
-            } else if($itemId =='newItem') {
+                    ->where('id', $itemId)
+                    ->update([
+                        'city' => $cityName,
+                        'groupName' => $request->groupName
+                    ]);
+            } else if ($itemId == 'newItem') {
                 DB::table('citygroup')->insert([
                     'group' => $id,
                     'city' => $cityName,
-                    'groupName' => $request->groupName
+                    'groupName' => $request->groupName,
+                    'username' => $request->user()->username
                 ]);
             }
         }
-        return back()->with(['cidades'=>json_decode($cidades, true), 'success'=> 'Grupo editado com sucesso!']);
+        return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'success' => 'Grupo editado com sucesso!']);
     }
 
     public function delete(Request $request, $id)
