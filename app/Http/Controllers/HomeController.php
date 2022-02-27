@@ -52,53 +52,19 @@ class HomeController extends Controller
         } else {
             $id = 1;
         }
-        
-        if ($request->filled('cidade1')) {
-            $cidade1 = $request->get('cidade1');
-            $query = DB::table('citygroup')->insert([
+        $cidades = array_filter(array_values($request->only('cidade1', 'cidade2', 'cidade3', 'cidade4', 'cidade5')));
+        if(sizeof(array_unique($cidades))!=sizeof($cidades)){
+            return back()->with('fail', 'Você não pode cadastrar cidades repetidas!');
+        }
+        for ($i = 0; $i < sizeof($cidades); $i++) {
+            DB::table('citygroup')->insert([
                 'group' => $id,
-                'city' => $cidade1,
+                'city' => $cidades[$i],
                 'groupName' => $groupName,
                 'username' => $request->user()->username
             ]);
         }
-        if ($request->filled('cidade2')) {
-            $cidade2 = $request->get('cidade2');
-            $query = DB::table('citygroup')->insert([
-                'group' => $id,
-                'city' => $cidade2,
-                'groupName' => $groupName,
-                'username' => $request->user()->username
-            ]);
-        }
-        if ($request->filled('cidade3')) {
-            $cidade3 = $request->get('cidade3');
-            $query = DB::table('citygroup')->insert([
-                'group' => $id,
-                'city' => $cidade3,
-                'groupName' => $groupName,
-                'username' => $request->user()->username
-            ]);
-        }
-        if ($request->filled('cidade4')) {
-            $cidade4 = $request->get('cidade4');
-            $query = DB::table('citygroup')->insert([
-                'group' => $id,
-                'city' => $cidade4,
-                'groupName' => $groupName,
-                'username' => $request->user()->username
-            ]);
-        }
-        if ($request->filled('cidade5')) {
-            $cidade5 = $request->get('cidade5');
-            $query = DB::table('citygroup')->insert([
-                'group' => $id,
-                'city' => $cidade5,
-                'groupName' => $groupName,
-                'username' => $request->user()->username
-            ]);
-        }
-        if ($request->filled('cidade1') || $request->filled('cidade2') || $request->filled('cidade3') || $request->filled('cidade4') || $request->filled('cidade5'))
+        if ($cidades!=[])
             return back()->with('success', 'Grupo "' . $groupName . '" inserido com sucesso!');
         else
             return back()->with('fail', 'Insira pelo menos uma cidade para criar um grupo!');
@@ -125,7 +91,17 @@ class HomeController extends Controller
     public function updateGroup(Request $request, $id)
     {
         $cidades = Storage::disk('local')->get('\capitais.json');
-        $ids = array_values($request->only('oldCity1', 'oldCity2', 'oldCity3', 'oldCity4', 'oldCity5', 'newCity1', 'newCity2', 'newCity3', 'newCity4', 'newCity5'));
+        $ids = array_filter(array_values($request->only('oldCity1', 'oldCity2', 'oldCity3', 'oldCity4', 'oldCity5', 'newCity1', 'newCity2', 'newCity3', 'newCity4', 'newCity5')));
+        $cidadesVerification = [];
+        foreach($ids as $cidade){
+            list($itemIdVerification, $cityNameVerification) = explode("_", $cidade);
+            $cidadesVerification[] = $cityNameVerification;
+        }
+
+        if(sizeof(array_unique($cidadesVerification))!=sizeof($cidadesVerification)){
+            return back()->with('fail', 'Você não pode editar cidades repetidas!');
+        }
+
         for ($i = 0; $i < sizeof($ids); $i++) {
             list($itemId, $cityName) = explode("_", $ids[$i]);
             if ($cityName == 'null') {

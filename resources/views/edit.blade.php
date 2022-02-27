@@ -39,7 +39,7 @@
                         </div>
                         @foreach ($group as $content)
                         <select class="form-select select-cities" aria-label="Default select example" name="oldCity{{$loop->index+1}}">
-                            <option value="{{$content->id}}_null">Selecione a Cidade {{$loop->index+1}}</option>
+                            <option value="{{$content->id}}_null">Remover a Cidade {{$loop->index+1}}</option>
                             @foreach ($cidades as $capitais)
                             <option {{ $content->city == $capitais['nome']  ? 'selected' : '' }} value="{{$content->id}}_{{$capitais['nome']}}">
                                 {{$capitais['nome']}}
@@ -48,7 +48,7 @@
                         </select>
                         @endforeach
                         @for ($i = count($group); $i < 5; $i++) <select class="form-select select-cities" aria-label="Default select example" name="newCity{{$i+1}}">
-                            <option value="null_null">Selecione a Cidade {{$i+1}}</option>
+                            <option value="">Selecione a Cidade {{$i+1}}</option>
                             @foreach ($cidades as $capitais)
                             <option value="newItem_{{ $capitais['nome'] }}">
                                 {{$capitais['nome']}}
