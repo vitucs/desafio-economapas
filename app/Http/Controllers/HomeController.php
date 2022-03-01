@@ -99,17 +99,19 @@ class HomeController extends Controller
         $cidades = Storage::disk('local')->get('\capitais.json');
         $ids = array_filter(array_values($request->only('oldCity1', 'oldCity2', 'oldCity3', 'oldCity4', 'oldCity5', 'newCity1', 'newCity2', 'newCity3', 'newCity4', 'newCity5')));
         $cidadesVerification = [];
+        
         foreach ($ids as $cidade) {
             list($itemIdVerification, $cityNameVerification) = explode("_", $cidade);
             $cidadesVerification[] = $cityNameVerification;
+            $updateCidades[] = $cidade;
         }
 
         if (sizeof(array_unique($cidadesVerification)) != sizeof($cidadesVerification)) {
             return back()->with('fail', 'Você não pode editar cidades repetidas!');
         }
 
-        for ($i = 0; $i < sizeof($ids); $i++) {
-            list($itemId, $cityName) = explode("_", $ids[$i]);
+        for ($i = 0; $i < sizeof($updateCidades); $i++) {
+            list($itemId, $cityName) = explode("_", $updateCidades[$i]);
 
             if ($cityName == 'null') {
                 DB::table('citygroup')->where('id', $itemId)->delete();
