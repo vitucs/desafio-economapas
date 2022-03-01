@@ -53,18 +53,24 @@ class HomeController extends Controller
             $id = 1;
         }
         $cidades = array_filter(array_values($request->only('cidade1', 'cidade2', 'cidade3', 'cidade4', 'cidade5')));
-        if(sizeof(array_unique($cidades))!=sizeof($cidades)){
+
+        if (sizeof(array_unique($cidades)) != sizeof($cidades)) {
             return back()->with('fail', 'Você não pode cadastrar cidades repetidas!');
         }
-        for ($i = 0; $i < sizeof($cidades); $i++) {
+
+        foreach ($cidades as $cidade) {
+            $insertCidades[] = $cidade;
+        }
+
+        for ($i = 0; $i < sizeof($insertCidades); $i++) {
             DB::table('citygroup')->insert([
                 'group' => $id,
-                'city' => $cidades[$i],
+                'city' => $insertCidades[$i],
                 'groupName' => $groupName,
                 'username' => $request->user()->username
             ]);
         }
-        if ($cidades!=[])
+        if ($cidades != [])
             return back()->with('success', 'Grupo "' . $groupName . '" inserido com sucesso!');
         else
             return back()->with('fail', 'Insira pelo menos uma cidade para criar um grupo!');
@@ -82,7 +88,7 @@ class HomeController extends Controller
     {
         $cidades = Storage::disk('local')->get('\capitais.json');
         $group = DB::table('citygroup')->where('group', '=', $id)->orderBy('id')->get();
-        if($request->user()->username!=$group[0]->username){
+        if ($request->user()->username != $group[0]->username) {
             return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'fail' => 'Você não pode editar esse grupo!']);
         }
         return view('edit', ['group' => $group])->with('cidades', json_decode($cidades, true));
@@ -93,22 +99,20 @@ class HomeController extends Controller
         $cidades = Storage::disk('local')->get('\capitais.json');
         $ids = array_filter(array_values($request->only('oldCity1', 'oldCity2', 'oldCity3', 'oldCity4', 'oldCity5', 'newCity1', 'newCity2', 'newCity3', 'newCity4', 'newCity5')));
         $cidadesVerification = [];
-        foreach($ids as $cidade){
+        foreach ($ids as $cidade) {
             list($itemIdVerification, $cityNameVerification) = explode("_", $cidade);
             $cidadesVerification[] = $cityNameVerification;
         }
 
-        if(sizeof(array_unique($cidadesVerification))!=sizeof($cidadesVerification)){
+        if (sizeof(array_unique($cidadesVerification)) != sizeof($cidadesVerification)) {
             return back()->with('fail', 'Você não pode editar cidades repetidas!');
         }
 
         for ($i = 0; $i < sizeof($ids); $i++) {
             list($itemId, $cityName) = explode("_", $ids[$i]);
+
             if ($cityName == 'null') {
                 DB::table('citygroup')->where('id', $itemId)->delete();
-                if (count(DB::table('citygroup')->where('group', $id)->get()) == 0) {
-                    return view('home', ['cidades' => json_decode($cidades, true)]);
-                }
             } else if ($itemId != 'newItem') {
                 DB::table('citygroup')
                     ->where('id', $itemId)
@@ -125,19 +129,23 @@ class HomeController extends Controller
                 ]);
             }
         }
+
+        if (count(DB::table('citygroup')->where('group', $id)->get()) == 0) {
+            return redirect('/home')->with(['cidades' => json_decode($cidades, true), 'success' => 'Grupo excluído com sucesso!']);
+        }
         return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'success' => 'Grupo editado com sucesso!']);
     }
 
     public function delete(Request $request, $id)
     {
         $groups = DB::table('citygroup')->where('group', $id)->get();
-        if($request->user()->username!=$groups[0]->username){
+        if ($request->user()->username != $groups[0]->username) {
             $cidades = Storage::disk('local')->get('\capitais.json');
             return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'fail' => 'Você não pode excluir esse grupo!']);
         }
         DB::table('citygroup')->where('group', $id)->delete();
         $collection = collect($groups);
-        $grouped = $collection->groupBy('group');        
+        $grouped = $collection->groupBy('group');
         return back()->with('success', 'Grupo excluido com sucesso!');
     }
 }
