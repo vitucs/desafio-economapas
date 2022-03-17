@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Groups;
 use App\Services\GroupService;
-use Hamcrest\Core\HasToString;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 use Storage;
 
@@ -36,21 +34,22 @@ class HomeController extends Controller
 
     public function create(Request $request)
     {
+        $groups = new Groups();
         if ($request->filled('groupName')) {
             $groupName = $request->groupName;
         } else {
             return back()->with('fail', 'Insira o nome do grupo!');
         }
-
-        if (count(DB::table('citygroup')->where('username', '=', $request->user()->username)->where('groupname', '=', $request->groupName)->get()) != 0) {
+        if (count($groups->checkGroupNameByUser($request->user()->username, $request->groupName)) != 0) {
             return back()->with('fail', 'Já existe um grupo com esse nome cadastrado!');
         }
 
-        $request->id = (new GroupService)->getLastGroupId();
-        if ($request->id != '1') {
-            $id = $request->id->group + 1;
+        $request->id = $groups->getLastGroupId();
+
+        if (intval($request->id->group) != 1) {
+            $groupId = intval($request->id->group) + 1;
         } else {
-            $id = 1;
+            $groupId = 1;
         }
         $cidades = array_filter(array_values($request->only('cidade1', 'cidade2', 'cidade3', 'cidade4', 'cidade5')));
 
@@ -63,13 +62,9 @@ class HomeController extends Controller
         }
 
         for ($i = 0; $i < sizeof($insertCidades); $i++) {
-            DB::table('citygroup')->insert([
-                'group' => $id,
-                'city' => $insertCidades[$i],
-                'groupName' => $groupName,
-                'username' => $request->user()->username
-            ]);
+            $groups->insertRegistry($groupId, $insertCidades[$i], $groupName, $request->user()->username);
         }
+
         if ($cidades != [])
             return back()->with('success', 'Grupo "' . $groupName . '" inserido com sucesso!');
         else
@@ -78,8 +73,8 @@ class HomeController extends Controller
 
     public function groups(Request $request)
     {
-        $groups = DB::table('citygroup')->where('username', '=', $request->user()->username)->orderBy('id')->get();
-        $collection = collect($groups);
+        $groups = new Groups();
+        $collection = collect($groups->searchGroupsByUser($request->user()->username));
         $grouped = $collection->groupBy('group');
         return view('groups', ['groups' => $grouped]);
     }
@@ -87,7 +82,8 @@ class HomeController extends Controller
     public function editGroup(Request $request, $id)
     {
         $cidades = Storage::disk('local')->get('\capitais.json');
-        $group = DB::table('citygroup')->where('group', '=', $id)->orderBy('id')->get();
+        $groups = new Groups();
+        $group = $groups->editById($id);
         if ($request->user()->username != $group[0]->username) {
             return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'fail' => 'Você não pode editar esse grupo!']);
         }
@@ -96,10 +92,11 @@ class HomeController extends Controller
 
     public function updateGroup(Request $request, $id)
     {
+        $groups = new Groups();
         $cidades = Storage::disk('local')->get('\capitais.json');
         $ids = array_filter(array_values($request->only('oldCity1', 'oldCity2', 'oldCity3', 'oldCity4', 'oldCity5', 'newCity1', 'newCity2', 'newCity3', 'newCity4', 'newCity5')));
         $cidadesVerification = [];
-        
+
         foreach ($ids as $cidade) {
             list($itemIdVerification, $cityNameVerification) = explode("_", $cidade);
             $cidadesVerification[] = $cityNameVerification;
@@ -112,27 +109,16 @@ class HomeController extends Controller
 
         for ($i = 0; $i < sizeof($updateCidades); $i++) {
             list($itemId, $cityName) = explode("_", $updateCidades[$i]);
-
             if ($cityName == 'null') {
-                DB::table('citygroup')->where('id', $itemId)->delete();
+                $groups->deleteById($itemId);
             } else if ($itemId != 'newItem') {
-                DB::table('citygroup')
-                    ->where('id', $itemId)
-                    ->update([
-                        'city' => $cityName,
-                        'groupName' => $request->groupName
-                    ]);
+                $groups->updateById($itemId, $cityName, $request->groupName);
             } else if ($itemId == 'newItem') {
-                DB::table('citygroup')->insert([
-                    'group' => $id,
-                    'city' => $cityName,
-                    'groupName' => $request->groupName,
-                    'username' => $request->user()->username
-                ]);
+                $groups->insertRegistry($id, $cityName, $request->groupName, $request->user()->username);
             }
         }
-
-        if (count(DB::table('citygroup')->where('group', $id)->get()) == 0) {
+        
+        if (count($groups->searchGroupsByGroupId($id)) == 0) {
             return redirect('/home')->with(['cidades' => json_decode($cidades, true), 'success' => 'Grupo excluído com sucesso!']);
         }
         return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'success' => 'Grupo editado com sucesso!']);
@@ -140,14 +126,14 @@ class HomeController extends Controller
 
     public function delete(Request $request, $id)
     {
-        $groups = DB::table('citygroup')->where('group', $id)->get();
-        if ($request->user()->username != $groups[0]->username) {
+        $groups = new Groups();
+        $search = $groups->searchGroupsByGroupId($id);
+        if ($request->user()->username != $search[0]->username) {
             $cidades = Storage::disk('local')->get('\capitais.json');
             return redirect('/groups')->with(['cidades' => json_decode($cidades, true), 'fail' => 'Você não pode excluir esse grupo!']);
         }
-        DB::table('citygroup')->where('group', $id)->delete();
-        $collection = collect($groups);
-        $grouped = $collection->groupBy('group');
+        $delete = $groups->deleteByGroupId($id);
+        $collection = collect($delete);
         return back()->with('success', 'Grupo excluido com sucesso!');
     }
 }

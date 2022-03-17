@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Groups extends Model
 {
@@ -23,4 +24,66 @@ class Groups extends Model
         'group',
         'city',
     ];
+
+    public function getAllGroups()
+    {
+        return DB::table('citygroup')->query()
+            ->get();
+    }
+
+    public function getLastGroupId()
+    {
+        
+        if(DB::table('citygroup')->query()->exists()==0)
+            return '1';
+        else
+            return DB::table('citygroup')->query()
+            ->orderBy('id', 'DESC')
+            ->first();
+    }
+
+    public function checkGroupNameByUser($username, $groupName)
+    {
+        return DB::table('citygroup')->where('username', '=', $username)->where('groupname', '=', $groupName)->get();
+    }
+
+    public function insertRegistry($id, $insertCidades, $groupName, $username)
+    {
+        return DB::table('citygroup')->insert([
+            'group' => $id,
+            'city' => $insertCidades,
+            'groupName' => $groupName,
+            'username' => $username
+        ]);
+    }
+
+    public function searchGroupsByGroupId($id)
+    {
+        return DB::table('citygroup')->where('group', $id)->get();
+    }
+
+    public function searchGroupsByUser($username)
+    {
+        return DB::table('citygroup')->where('username', '=', $username)->orderBy('id')->get();
+    }
+
+    public function editById($id)
+    {
+        return DB::table('citygroup')->where('group', '=', $id)->orderBy('id')->get();
+    }
+
+    public function deleteById($id)
+    {
+        return DB::table('citygroup')->where('id', $id)->delete();
+    }
+
+    public function deleteByGroupId($id)
+    {
+        return DB::table('citygroup')->where('group', $id)->delete();
+    }
+    
+    public function updateById($id, $cityName, $groupName)
+    {
+        return DB::table('citygroup')->where('id', $id)->update(['city' => $cityName,'groupName' => $groupName]);
+    }
 }

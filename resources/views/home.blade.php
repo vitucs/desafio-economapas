@@ -22,6 +22,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/groups">Grupos já Existentes</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="/groups">Editar Grupo</a>
+                </li>
             </ul>
         </div>
         <div class="card-body">
