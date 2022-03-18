@@ -46,7 +46,7 @@ class HomeController extends Controller
 
         $request->id = $groups->getLastGroupId();
 
-        if (intval($request->id->group) != 1) {
+        if (intval($request->id->group) != NULL) {
             $groupId = intval($request->id->group) + 1;
         } else {
             $groupId = 1;

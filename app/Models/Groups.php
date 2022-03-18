@@ -33,13 +33,7 @@ class Groups extends Model
 
     public function getLastGroupId()
     {
-        
-        if(DB::table('citygroup')->query()->exists()==0)
-            return '1';
-        else
-            return DB::table('citygroup')->query()
-            ->orderBy('id', 'DESC')
-            ->first();
+        return DB::table('citygroup')->orderBy('id', 'DESC')->first();
     }
 
     public function checkGroupNameByUser($username, $groupName)
@@ -81,9 +75,9 @@ class Groups extends Model
     {
         return DB::table('citygroup')->where('group', $id)->delete();
     }
-    
+
     public function updateById($id, $cityName, $groupName)
     {
-        return DB::table('citygroup')->where('id', $id)->update(['city' => $cityName,'groupName' => $groupName]);
+        return DB::table('citygroup')->where('id', $id)->update(['city' => $cityName, 'groupName' => $groupName]);
     }
 }
