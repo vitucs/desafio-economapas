@@ -102,8 +102,9 @@ class HomeController extends Controller
             $cidadesVerification[] = $cityNameVerification;
             $updateCidades[] = $cidade;
         }
+        $editVerification = array_diff_key(array_flip($cidadesVerification), array("null"=>0));
 
-        if (sizeof(array_unique($cidadesVerification)) != sizeof($cidadesVerification)) {
+        if (sizeof(array_unique(array_flip($editVerification))) != sizeof(array_flip($editVerification))) {
             return back()->with('fail', 'Você não pode editar cidades repetidas!');
         }
 
